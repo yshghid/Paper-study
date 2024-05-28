@@ -1,6 +1,6 @@
 # Paper-study
 
-Details of papers tested in each directory can be found on [this blog][1]
+Details of papers tested in each directory can be found on [blog][1]
 
 - Clique Connectivity [Cliques for the identification of gene signatures for colorectal cancer across population][2]
 
