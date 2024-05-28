@@ -1,5 +1,5 @@
 # Paper-study
 
-Details of papers tested in each directory can be found on [this blog][1]
+Details of papers tested in each directory can be found on the [blog][1]
 
-[1]: https://yshghid.github.io/jekyll/2024-05-20-papers.html
+[1]: https://yshghid.github.io
