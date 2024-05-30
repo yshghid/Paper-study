@@ -452,3 +452,8 @@ major_tfs
 
 [1]: https://www.frontiersin.org/journals/plant-science/articles/10.3389/fpls.2019.00698/full
 [2]: https://github.com/yshghid/Paper-study/blob/main/%234-RWR-TF/readme.md#%EB%8D%B0%EC%9D%B4%ED%84%B0-%EB%A1%9C%EB%93%9C
+[3]: https://github.com/yshghid/Paper-study/blob/main/%234-RWR-TF/readme.md#%EC%8B%9C%EC%A0%90%EB%B3%84-%EC%B0%A8%EB%93%B1-%EB%B0%9C%ED%98%84-%EC%9C%A0%EC%A0%84%EC%9E%90-%EC%8B%9D%EB%B3%84
+[4]: https://github.com/yshghid/Paper-study/blob/main/%234-RWR-TF/readme.md#%EC%8B%9C%EC%A0%90%EB%B3%84-%EC%A0%84%EC%82%AC-%EC%9D%B8%EC%9E%90-%EB%84%A4%ED%8A%B8%EC%9B%8C%ED%81%AC-%EC%83%9D%EC%84%B1
+[5]: https://github.com/yshghid/Paper-study/blob/main/%234-RWR-TF/readme.md#%EC%A0%84%EC%82%AC-%EC%9D%B8%EC%9E%90-%EC%98%81%ED%96%A5%EB%A0%A5-%EC%88%9C%EC%9C%84-%EC%B8%A1%EC%A0%95
+[6]: https://github.com/yshghid/Paper-study/blob/main/%234-RWR-TF/readme.md#np-%EC%95%8C%EA%B3%A0%EB%A6%AC%EC%A6%98%EC%9C%BC%EB%A1%9C-%EC%8B%9C%EC%A0%90%EB%B3%84-%EC%A3%BC%EC%9A%94-%EC%A1%B0%EC%A0%88-tf-%EC%8B%9D%EB%B3%84
+
