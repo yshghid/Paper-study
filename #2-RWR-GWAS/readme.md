@@ -1,4 +1,4 @@
-### Outline
+## Outline
 
 GWAS 카탈로그 로드, SNP 통계 테스트
 
@@ -10,6 +10,7 @@ GWAS 카탈로그 로드, SNP 통계 테스트
 
 RWR 알고리즘 수행
 
+## Code
 
 ### GWAS 카탈로그 로드, SNP 통계 테스트
 
