@@ -451,4 +451,4 @@ major_tfs
 
 
 [1]: https://www.frontiersin.org/journals/plant-science/articles/10.3389/fpls.2019.00698/full
-[2]: 
+[2]: https://github.com/yshghid/Paper-study/blob/main/%234-RWR-TF/readme.md#%EB%8D%B0%EC%9D%B4%ED%84%B0-%EB%A1%9C%EB%93%9C
