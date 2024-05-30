@@ -1,6 +1,6 @@
 # Outline
 
-데이터 로드
+[데이터 로드][2]
 
 시점별 차등 발현 유전자 식별
 
@@ -446,3 +446,9 @@ major_tfs
  't6': ['tf2'],
  't7': ['tf2', 'tf4']}
 ```
+
+원문 링크: [PropaNet: Time-Varying Condition-Specific Transcriptional Network Construction by Network Propagation][1]
+
+
+[1]: https://www.frontiersin.org/journals/plant-science/articles/10.3389/fpls.2019.00698/full
+[2]: 
