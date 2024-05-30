@@ -5,11 +5,11 @@ Paper Study has coded papers on bioinformatics and graph theory algorithms. The 
 
 ## Papers
 
-1) [RWR]Clique-Connectivity: Cliques for the identification of gene signatures for colorectal cancer across population [1][1]
+1) Cliques for the identification of gene signatures for colorectal cancer across population [1][1]
 
-2) [RWR]GWAS: Network propagation for GWAS analysis: a practical guide to leveraging molecular networks for disease gene discovery [2][2]
+2) Network propagation for GWAS analysis: a practical guide to leveraging molecular networks for disease gene discovery [2][2]
 
-3) [RWR]TF: PropaNet: Time-Varying Condition-Specific Transcriptional Network Construction by Network Propagation [3][3]
+3) PropaNet: Time-Varying Condition-Specific Transcriptional Network Construction by Network Propagation [3][3]
 
 
 
