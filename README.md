@@ -10,8 +10,8 @@ I hope this code helps in understanding the changes in data resulting from the a
 
 ### References
 
-1) Pradhan, Meeta P., Kshithija Nagulapalli, and Mathew J. Palakal. "Cliques for the identification of gene signatures for colorectal cancer across population." BMC systems biology 6 (2012): 1-17.
+#1 Pradhan, Meeta P., Kshithija Nagulapalli, and Mathew J. Palakal. "Cliques for the identification of gene signatures for colorectal cancer across population." BMC systems biology 6 (2012): 1-17.
 
-2) Visonà, Giovanni, et al. "Network propagation for GWAS analysis: a practical guide to leveraging molecular networks for disease gene discovery." Briefings in bioinformatics 25.2 (2024): bbae014.
+#2 Visonà, Giovanni, et al. "Network propagation for GWAS analysis: a practical guide to leveraging molecular networks for disease gene discovery." Briefings in bioinformatics 25.2 (2024): bbae014.
 
-3) Ahn, Hongryul, et al. "Propanet: Time-varying condition-specific transcriptional network construction by network propagation." Frontiers in plant science 10 (2019): 444086.
+#4 Ahn, Hongryul, et al. "Propanet: Time-varying condition-specific transcriptional network construction by network propagation." Frontiers in plant science 10 (2019): 444086.
