@@ -1,5 +1,3 @@
 # Paper-study
 
-Paper Study is written to implement computational biology algorithm papers, allowing them to be run without separate data downloads. 
-The written code generates small data that meets the minimum biological requirements, aiming for an intuitive understanding of the pipeline. 
-Efforts have been made to minimize the data that needs to be downloaded, but if necessary, it can be downloaded from each directory.
+Paper Study has coded papers on bioinformatics and graph theory algorithms. The code is designed to provide an intuitive understanding of the pipeline outlined in the paper, and therefore, it has been written to proceed without the need for separate data downloads. It is hoped that this will help understand the changes in data resulting from the application of the algorithm.
