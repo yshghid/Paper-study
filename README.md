@@ -1,8 +1,8 @@
 # Paper-study
 
-## Paper study in bioinformatics and graph theory
+## Algorithms in bioinformatics and graph theory
 
-Paper Study has coded those algorithm papers. 
+Paper Study has coded papers. 
 
 The code is designed to provide an intuitive understanding of the pipeline outlined in the paper, and therefore, it has been written to proceed without the need for separate data downloads. 
 
