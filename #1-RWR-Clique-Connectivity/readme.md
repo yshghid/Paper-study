@@ -1,6 +1,3 @@
-
-원문: [Cliques for the identification of gene signatures for colorectal cancer across population][1]
-
 ### 데이터셋 생성
    
 4개 국가(USA, GER, CHN, SA)의 대장암(CRC) 데이터셋을 가져온다. 4개 데이터셋은 모두 행은 100개의 유전자(g1-g100), 열은 10개의 샘플로 구성되었으며 CRC 환자(p1-p5)와 대조군(c1-c5)으로 구성해줬다.
@@ -383,5 +380,7 @@ print(len(ccp[0][0]),len(ccp[1][0])) # 0행의 클리크 크기
 
 위 결과는 US 데이터로 식별한 최대 클리크들과 그들의 연결성 점수이다. 이를 국가마다 수행하고, 공통된 최대 클리크(top common scoring cliques)를 찾아서 그 클리크의 연결성 프로필(connectivity profile for one of the top common scoring cliques)을 국가마다 비교해보면, 즉 동일한 시드에서 시작하는 각 국가의 CCP를 비교하면 공통된 최대 클리크에 대한 클리크 연결성 인사이트를 얻을 수 있다. 
 
+
+원문: [Cliques for the identification of gene signatures for colorectal cancer across population][1]
 
 [1]: https://bmcsystbiol.biomedcentral.com/articles/10.1186/1752-0509-6-S3-S17
