@@ -11,17 +11,17 @@ target_genes = load_target_genes()
 expression
 >>
 	p1	p2	p3	p4	p5	p6	p7	p8	p9	p10	time
-g1	12	7	15	14	10	13	9	12	14	10	t1
-g2	3	7	9	11	3	3	1	6	5	3	t1
-g3	17	4	5	7	16	14	16	19	16	17	t1
-g4	8	17	11	11	9	7	9	7	7	8	t1
-g5	8	19	15	15	6	7	10	9	7	9	t1
+g1	7	7	9	5	4	5	4	10	8	7	t1
+g2	14	5	14	14	14	10	10	16	14	16	t1
+g3	8	15	10	15	7	7	11	9	6	7	t1
+g4	14	16	10	9	14	13	12	15	15	15	t1
+g5	7	5	14	10	4	7	8	8	8	5	t1
 ...	...	...	...	...	...	...	...	...	...	...	...
-tf3	9	9	6	21	7	10	10	7	6	9	t7
-tf4	20	14	18	23	22	18	20	20	19	17	t7
-tf5	15	10	10	4	16	16	11	15	14	15	t7
-tf6	8	7	5	12	7	6	7	6	12	8	t7
-tf7	10	4	7	10	11	11	13	7	10	7	t7
+tf3	8	8	2	17	10	7	7	10	6	7	t7
+tf4	7	8	18	7	6	4	9	8	8	6	t7
+tf5	8	18	4	24	4	10	5	8	8	10	t7
+tf6	7	14	5	6	3	7	4	6	9	9	t7
+tf7	21	6	18	18	22	19	20	20	19	22	t7
 189 rows × 11 columns
 ```
 ```
@@ -69,94 +69,64 @@ deg_sets = identify_degs(expression)
 deg_sets
 ```
 ```
-{'t2': ['g2',
-  'g4',
-  'g6',
-  'g8',
-  'g9',
-  'g12',
-  'g13',
-  'g14',
-  'g15',
-  'g16',
-  'g18',
-  'g19',
-  'tf2',
-  'tf3',
-  'tf5',
-  'tf6',
-  'tf7'],
+{'t2': ['g1', 'g4', 'g13', 'g16', 'g17', 'tf2', 'tf3', 'tf6'],
  't3': ['g1',
   'g2',
+  'g4',
   'g6',
   'g7',
-  'g13',
-  'g15',
+  'g9',
+  'g11',
   'g17',
   'g18',
-  'tf1',
+  'g19',
+  'tf2',
   'tf3',
+  'tf4',
   'tf5',
   'tf6'],
- 't4': ['g2',
+ 't4': ['g1',
+  'g2',
+  'g4',
   'g6',
   'g7',
   'g8',
   'g10',
   'g11',
-  'g14',
-  'g15',
+  'g13',
   'g16',
   'g17',
   'g18',
   'g19',
-  'tf1',
-  'tf3',
-  'tf5',
-  'tf6'],
- 't5': ['g1',
-  'g3',
-  'g4',
-  'g7',
-  'g8',
-  'g10',
-  'g12',
-  'g13',
-  'g14',
-  'g15',
-  'g17',
-  'g18',
   'g20',
   'tf2',
-  'tf4',
-  'tf5'],
- 't6': ['g2',
+  'tf6'],
+ 't5': ['g1',
+  'g2',
   'g3',
   'g4',
-  'g6',
-  'g7',
-  'g8',
   'g10',
-  'g11',
-  'g14',
-  'g15',
-  'g17',
-  'g20',
-  'tf1',
-  'tf5'],
- 't7': ['g1',
-  'g2',
-  'g5',
-  'g6',
-  'g9',
   'g11',
   'g12',
   'g13',
-  'g14',
-  'g15',
   'g16',
-  'tf4',
-  'tf5']}
+  'g18',
+  'g19',
+  'g20',
+  'tf2'],
+ 't6': ['g4', 'g5', 'g8', 'g10', 'g12', 'g14', 'g16', 'g18', 'g19', 'tf1'],
+ 't7': ['g1',
+  'g2',
+  'g3',
+  'g4',
+  'g5',
+  'g10',
+  'g16',
+  'g18',
+  'g19',
+  'tf3',
+  'tf6',
+  'tf7']}
 ```
 
 ## 시점별 전사 인자 네트워크 생성
@@ -207,38 +177,37 @@ def propa_net_pipeline():
     return time_specific_nodes, time_specific_graphs
 
 time_specific_nodes, time_specific_graphs = propa_net_pipeline()
-
+```
+```
 time_specific_nodes
+>>
+{'t2':   node1 node2
+ 0   tf1    g2
+ 1   tf2    g8
+ 2   tf4    g2
+ 3   tf6    g2,
+ 't3':   node1 node2
+ 0   tf1    g2
+ 1   tf2    g8
+ 2   tf4    g2
+ 3   tf6    g2,
+ 't4':   node1 node2
+ 0   tf1    g2
+ 1   tf4    g2
+ 2   tf4    g6
+ 3   tf6    g2,
+ 't5':   node1 node2
+ 0   tf2    g8,
+ 't6':   node1 node2
+ 0   tf4    g6,
+ 't7':   node1 node2
+ 0   tf1    g2
+ 1   tf4    g2
+ 2   tf6    g2}
+```
+```
 time_specific_graphs
-```
-```
-{'t2': ['g2',
-  'tf6',
-  'tf2',
-  'g6',
-  'tf5',
-  'tf4',
-  'tf3',
-  'tf1',
-  'g8',
-  'g4',
-  'tf7'],
- 't3': ['g2', 'tf6', 'tf2', 'g6', 'tf5', 'tf4', 'tf3', 'tf1', 'tf7'],
- 't4': ['g2', 'tf6', 'tf2', 'g6', 'tf5', 'tf4', 'tf3', 'tf1', 'g8', 'tf7'],
- 't5': ['tf6', 'tf2', 'tf5', 'tf4', 'tf3', 'tf1', 'g8', 'g4', 'tf7'],
- 't6': ['g2',
-  'tf6',
-  'tf2',
-  'g6',
-  'tf5',
-  'tf4',
-  'tf3',
-  'tf1',
-  'g8',
-  'g4',
-  'tf7'],
- 't7': ['g2', 'tf6', 'tf2', 'g6', 'tf5', 'tf4', 'tf3', 'tf1', 'tf7']}
-
+>>
 {'t2':   node1 node2
  0   tf1    g2
  1   tf2    g4
@@ -276,11 +245,11 @@ time_specific_graphs
 
 ## 전사 인자 영향력 순위 측정
 
-시점(j)별 전사 인자 초기 네트워크를 형성했다. 이때 노드로 사용된 유전자는 TGset ∩ DEGset(j) 였다. TGset ∩ DEGset에 대한 영향력을 기준으로 전사인자(TF)를 순위 매기기 위해 라벨 영향력 극대화 알고리즘을 사용하였다. 각 TF의 영향력은 시간에 따라 차별적으로 발현된 유전자들을 얼마나 많이 조절하는지에 따라 결정된다.
+시점(j)별 전사 인자 초기 네트워크를 형성했다. 이때 노드로 사용된 유전자는 TGset ∩ DEGset(j) 였다. TGset ∩ DEGset에 대한 영향력을 기준으로 전사인자(TF)를 순위 매기기 위해 레이블 영향력 최대화(Labeled influence maximization) 알고리즘을 사용한다. 각 TF의 영향력은 시간에 따라 차별적으로 발현된 유전자들을 얼마나 많이 조절하는지에 따라 결정된다.
 
 ```python
 # Function to calculate influence
-def calculate_influence(time_specific_networks, tf_network, deg_sets, target_genes, rounds=100):
+def calculate_influence(time_specific_networks, tf_network, deg_sets, target_genes, de_levels, rounds=100):
     influence_results = {}
     
     for time_point, network in time_specific_networks.items():
@@ -293,8 +262,8 @@ def calculate_influence(time_specific_networks, tf_network, deg_sets, target_gen
         
         tf_set = list(set(tf_network['TF'].unique()) & set(nodes))
         
-        # Initialize DE(s) and IL(t)
-        de = {node: abs(np.random.randn()) for node in nodes}  # Using random values for DE(s)
+        # Initialize DE(s) and IL(t) using precomputed differential expression levels
+        de = de_levels[time_point].to_dict()['differential_expression']
         il = {tf: 0 for tf in tf_set}
         
         for _ in range(rounds):
@@ -316,7 +285,7 @@ def calculate_influence(time_specific_networks, tf_network, deg_sets, target_gen
                             queue.append(neighbor)
                 
                 if reachable:
-                    il[tf] += sum(de[node] for node in reachable) / len(reachable)
+                    il[tf] += sum(de[node] for node in reachable if node in de) / len(reachable)
         
         for tf in il:
             il[tf] /= rounds
@@ -325,60 +294,141 @@ def calculate_influence(time_specific_networks, tf_network, deg_sets, target_gen
     
     return influence_results
 
-influence_results = calculate_influence(time_specific_networks, tf_network, deg_sets, target_genes)
+influence_results = calculate_influence(time_specific_networks, tf_network, deg_sets, target_genes, de_levels)
 
 influence_results
 ```
 ```
-{'t2': {'tf6': 0.7027490449494657,
-  'tf2': 0.7635642961695567,
-  'tf5': 0.0,
-  'tf4': 0.4748264715382994,
-  'tf3': 0.0,
-  'tf1': 0.7165284379876905,
-  'tf7': 0.0},
- 't3': {'tf6': 1.2217646419851387,
-  'tf2': 0.0,
-  'tf5': 0.0,
-  'tf4': 1.9350372858187732,
-  'tf3': 0.0,
-  'tf1': 1.434245449286902,
-  'tf7': 0.0},
- 't4': {'tf6': 0.4166727077002777,
-  'tf2': 0.2984318032054628,
-  'tf5': 0.0,
-  'tf4': 0.9166101758545078,
-  'tf3': 0.0,
-  'tf1': 0.42453445690216973,
-  'tf7': 0.0},
- 't5': {'tf6': 0.0,
-  'tf2': 0.5579100117201744,
-  'tf5': 0.0,
+{'t2': {'tf7': 0.0,
   'tf4': 0.0,
+  'tf6': 0.0,
+  'tf2': -3.76,
   'tf3': 0.0,
   'tf1': 0.0,
-  'tf7': 0.0},
- 't6': {'tf6': 0.12032426844012253,
-  'tf2': 0.8278748278573331,
-  'tf5': 0.0,
-  'tf4': 1.1288900038675553,
+  'tf5': 0.0},
+ 't3': {'tf7': 0.0,
+  'tf4': -3.6,
+  'tf6': -2.45,
+  'tf2': -2.36,
   'tf3': 0.0,
-  'tf1': 0.1422014081565084,
-  'tf7': 0.0},
- 't7': {'tf6': 0.6688486243949332,
-  'tf2': 0.0,
-  'tf5': 0.0,
-  'tf4': 0.5439017871366648,
+  'tf1': -2.45,
+  'tf5': 0.0},
+ 't4': {'tf7': 0.0,
+  'tf4': -4.36,
+  'tf6': -3.57,
+  'tf2': 0.66,
   'tf3': 0.0,
-  'tf1': 0.6242587161019375,
-  'tf7': 0.0}}
+  'tf1': -3.5,
+  'tf5': 0.0},
+ 't5': {'tf7': 0.0,
+  'tf4': -3.57,
+  'tf6': -4.13,
+  'tf2': -3.96,
+  'tf3': 0.0,
+  'tf1': -3.78,
+  'tf5': 0.0},
+ 't6': {'tf7': 0.0,
+  'tf4': 0.0,
+  'tf6': 0.0,
+  'tf2': -0.28,
+  'tf3': 0.0,
+  'tf1': 0.0,
+  'tf5': 0.0},
+ 't7': {'tf7': 0.0,
+  'tf4': -3.76,
+  'tf6': -4.24,
+  'tf2': 2.35,
+  'tf3': 0.0,
+  'tf1': -4.32,
+  'tf5': 0.0}}
 ```
 
-각 시점에 대해 TGset, DEGset, 그리고 노드의 교집합을 식별합니다.
-DE(s)를 절대 차별 발현 수준으로 초기화하고 IL(t)를 0으로 초기화합니다.
-각 라운드마다, 확률 0.5로 각 엣지를 포함하여 서브 그래프를 생성합니다.
-BFS를 사용하여 각 TF에서 서브 그래프에서 도달 가능한 모든 노드를 찾습니다.
-여러 라운드 동안의 평균을 계산하여 각 TF의 영향을 평가합니다.
+노드의 초기 가중치는 절대 차등 발현량으로, TF의 초기 영향력(IL)을 0으로 설정한다. 다음으로, 각 에지에 대해 확률이 1 - p인 에지를 선택하여 부분 그래프 G'를 생성한다. 여기서 p는 원본 그래프 G에서 에지의 가중치이며 초기 전사 인자 네트워크에서 가중치를 설정하지 않았기 때문에 p=0.5가 되었다. 다음으로, IL은 생성된 부분 그래프 G'에서 TF가 도달할 수 있는 노드의 가중치 평균(∑DE(s′)/|AllReachableNodesG′(t)|)에 따라 증가한다. 이 과정을 Round번 반복하고, 여러 라운드 동안의 평균을 계산하여 시점별로 IL을 업데이트함으로써 각 TF의 영향을 평가한다.
 
+## NP 알고리즘으로 시점별 주요 조절 TF 식별
 
+네트워크 전파를 사용하여 주요 조절 전사인자(TF)를 식별한다. 네트워크 전파 알고리즘으로는 랜덤 워크 재시작(RWR) 알고리즘이 사용되었다.
 
+```python
+def network_propagation(W, p0, alpha, iterations):
+    p = p0
+    for _ in range(iterations):
+        p = alpha * p0 + (1 - alpha) * np.dot(W, p)
+    return p
+
+def identify_major_regulatory_tfs(time_specific_networks, tf_network, deg_sets, de_levels, alpha=0.7, iterations=100):
+    major_tfs = {}
+    
+    for time_point, network in time_specific_networks.items():
+        nodes = network['nodes']
+        edges = network['edges']
+        
+        # Create adjacency matrix W
+        node_index = {node: idx for idx, node in enumerate(nodes)}
+        W = np.zeros((len(nodes), len(nodes)))
+        for u, v in edges:
+            W[node_index[u], node_index[v]] = 1
+        
+        # Normalize the adjacency matrix
+        row_sums = W.sum(axis=1, keepdims=True)
+        row_sums[row_sums == 0] = 1  # Avoid division by zero
+        W = W / row_sums
+        
+        # Initialize influence scores
+        tf_influence_scores = {tf: influence_results[time_point].get(tf, 0) for tf in nodes if tf.startswith('tf')}
+        sorted_tfs = sorted(tf_influence_scores.keys(), key=lambda x: tf_influence_scores[x], reverse=True)
+        
+        # Differential expression values
+        de = de_levels[time_point]['differential_expression'].to_dict()
+        de_values = np.array([de[node] if node in de else 0 for node in nodes])
+        
+        # Network propagation and selection of major regulatory TFs
+        p0 = np.zeros(len(nodes))
+        selected_tfs = []
+        max_scc = -1
+        
+        for tf in sorted_tfs:
+            p0[node_index[tf]] = tf_influence_scores[tf]
+            propagated_values = network_propagation(W, p0, alpha, iterations)
+            
+            # Check for constant input arrays
+            if np.all(propagated_values == propagated_values[0]) or np.all(de_values == de_values[0]):
+                scc = -1
+            else:
+                scc, _ = spearmanr(propagated_values, de_values)
+            
+            if scc > max_scc:
+                max_scc = scc
+                selected_tfs.append(tf)
+            else:
+                p0[node_index[tf]] = 0
+        
+        major_tfs[time_point] = selected_tfs
+        
+        #for tf in sorted_tfs:
+        #    p0[node_index[tf]] = tf_influence_scores[tf]
+        #    propagated_values = network_propagation(W, p0, alpha, iterations)
+        #    scc, _ = spearmanr(propagated_values, de_values)
+            
+        #    if scc > max_scc:
+        #        max_scc = scc
+        #        selected_tfs.append(tf)
+        #    else:
+        #        p0[node_index[tf]] = 0
+        
+        #major_tfs[time_point] = selected_tfs
+    
+    return major_tfs
+
+major_tfs = identify_major_regulatory_tfs(time_specific_networks, tf_network, deg_sets, de_levels)
+
+major_tfs
+```
+```
+{'t2': ['tf2'],
+ 't3': ['tf2', 'tf4'],
+ 't4': ['tf2', 'tf1'],
+ 't5': ['tf4', 'tf1', 'tf2'],
+ 't6': ['tf2'],
+ 't7': ['tf2', 'tf4']}
+```
