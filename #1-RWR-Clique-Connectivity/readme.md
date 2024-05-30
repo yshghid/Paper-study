@@ -1,3 +1,5 @@
+Korean version is provided [here][2].
+
 # Outline
 
 1) Dataset creation
@@ -180,7 +182,7 @@ Node	Degree	Eccentricity	Closeness	Betweenness	NodeStrength
 
 ## Edge strength calculation
    
-3가지 생물학적 특성(피어슨 상관계수, Gene Ontology 거리, 경로 유사성 점수)를 계산해서 에지 강도를 계산했다. 
+Edge strength was calculated by evaluating three biological characteristics: Pearson correlation coefficient, Gene Ontology distance, and pathway similarity scores.
 
 ```python
 # Calculate PCC
@@ -202,6 +204,80 @@ for edge in usa_graph.edges():
 print("\n".join([f"{k}: {v}" for k, v in list(edge_strengths.items())[:10]]))
 ```
 ```
+('g1', 'g2'): {'PCC': 0.7282491388045326}
+('g1', 'g3'): {'PCC': 0.7653527213164605}
+('g1', 'g4'): {'PCC': 0.8789570085087596}
+('g1', 'g5'): {'PCC': 0.7507769564392135}
+('g1', 'g7'): {'PCC': 0.89352960600505}
+('g1', 'g10'): {'PCC': 0.7938443708009103}
+('g1', 'g11'): {'PCC': 0.9128834471868577}
+('g1', 'g12'): {'PCC': 0.8791171328799973}
+('g1', 'g13'): {'PCC': 0.8601812558178221}
+('g1', 'g18'): {'PCC': 0.9459181554886529}
+```
+
+GO term and pathway information for each gene were randomly generated. The logic used for calculating Gene Ontology distance and pathway similarity scores was also temporary, designed only for the sake of producing results, rather than being based on actual algorithms.
+
+```python
+# Calculate Gene Ontology Distance 
+def calculate_go_distance(go_annotations1, go_annotations2): #임시 로직
+    go_union = go_annotations1.union(go_annotations2)
+    go_intersection = go_annotations1.intersection(go_annotations2)
+    go_symmetric_difference = go_annotations1.symmetric_difference(go_annotations2)
+    if len(go_union) == 0:
+        return 1
+    return len(go_symmetric_difference) / (len(go_union) + len(go_intersection))
+
+with open('GO-term.dic', 'r') as file:
+    gene_go_annotations = json.load(file)
+gene_go_annotations = {k: set(v) for k, v in gene_go_annotations.items()}
+    
+for edge in edge_strengths.keys():
+    gene1, gene2 = edge
+    go_distance = calculate_go_distance(gene_go_annotations[gene1], gene_go_annotations[gene2])
+    edge_strengths[edge]['GO'] = go_distance
+
+# Calculate Pathway Similarity 
+def calculate_pathway_similarity(pathways1, pathways2): #임시 로직
+    common_pathways = pathways1.intersection(pathways2)
+    unique_pathways = pathways1.union(pathways2)
+    if len(unique_pathways) == 0:
+        return 0
+    return len(common_pathways) / len(unique_pathways)
+
+with open('gene-pathways.dic', 'r') as file:
+    gene_pathways = json.load(file)
+gene_pathways = {k: set(v) for k, v in gene_pathways.items()}
+
+for edge in edge_strengths.keys():
+    gene1, gene2 = edge
+    pathway_similarity = calculate_pathway_similarity(gene_pathways[gene1], gene_pathways[gene2])
+    edge_strengths[edge]['Pathway'] = pathway_similarity
+
+# Normalize and Combine Features to Calculate Edge Strength
+def normalize(values):
+    min_val = min(values)
+    max_val = max(values)
+    return [(v - min_val) / (max_val - min_val) for v in values]
+
+# Normalize the features
+pcc_values = [v['PCC'] for v in edge_strengths.values()]
+go_values = [v['GO'] for v in edge_strengths.values()]
+pathway_values = [v['Pathway'] for v in edge_strengths.values()]
+
+pcc_normalized = normalize(pcc_values)
+go_normalized = normalize(go_values)
+pathway_normalized = normalize(pathway_values)
+
+for i, edge in enumerate(edge_strengths.keys()):
+    edge_strengths[edge]['PCC_Norm'] = pcc_normalized[i]
+    edge_strengths[edge]['GO_Norm'] = go_normalized[i]
+    edge_strengths[edge]['Pathway_Norm'] = pathway_normalized[i]
+    edge_strengths[edge]['EdgeStrength'] = (pcc_normalized[i] + go_normalized[i] + pathway_normalized[i]) / 3
+
+print("\n".join([f"{k}: {v}" for k, v in list(edge_strengths.items())[:10]]))
+```
+```
 ('g1', 'g2'): {'PCC': 0.7282491388045326, 'GO': 1.0, 'Pathway': 0.20689655172413793, 'PCC_Norm': 0.8681905318695081, 'GO_Norm': 1.0, 'Pathway_Norm': 0.5172413793103448, 'EdgeStrength': 0.7951439703932843}
 ('g1', 'g3'): {'PCC': 0.7653527213164605, 'GO': 1.0, 'Pathway': 0.13333333333333333, 'PCC_Norm': 0.8873800558719053, 'GO_Norm': 1.0, 'Pathway_Norm': 0.3333333333333333, 'EdgeStrength': 0.7402377964017463}
 ('g1', 'g4'): {'PCC': 0.8789570085087596, 'GO': 1.0, 'Pathway': 0.03125, 'PCC_Norm': 0.9461348188425974, 'GO_Norm': 1.0, 'Pathway_Norm': 0.078125, 'EdgeStrength': 0.6747532729475325}
@@ -214,22 +290,117 @@ print("\n".join([f"{k}: {v}" for k, v in list(edge_strengths.items())[:10]]))
 ('g1', 'g18'): {'PCC': 0.9459181554886529, 'GO': 1.0, 'Pathway': 0.18181818181818182, 'PCC_Norm': 0.9807663139761367, 'GO_Norm': 1.0, 'Pathway_Norm': 0.45454545454545453, 'EdgeStrength': 0.811770589507197}
 ```
 
+## Identification of maximum cliques, calculation of clique connectivity scores, identification of CCP (Clique Connectivity Profiles)
 
+Five maximum cliques are selected as seeds, and clique connectivity scores are calculated.
 
+```python
+# Identify maximum cliques
+#cliques = [clique for size in range(3, 8) for clique in nx.find_cliques(usa_graph) if len(clique) == size]
+cliques = sorted(nx.find_cliques(usa_graph), key=len, reverse=True)[:5]
 
+# Calculate clique strength
+#def calculate_clique_strength(clique, node_strength, edge_strengths):
+#    node_strength_sum = sum(node_strength[node] for node in clique)
+#    edge_strength_sum = sum(edge_strengths[edge]['EdgeStrength'] for edge in combinations(clique, 2) if edge in edge_strengths)
+#    return node_strength_sum + edge_strength_sum
 
+# Calculate clique strength
+def calculate_clique_strength(clique, node_strength, edge_strengths):
+    node_strength_sum = sum(node_strength[node] for node in clique)
+    edge_strength_sum = 0
+    for i in range(len(clique)):
+        for j in range(i + 1, len(clique)):
+            edge = (clique[i], clique[j])
+            if edge in edge_strengths:
+                edge_strength_sum += edge_strengths[edge]['EdgeStrength']
+            else:
+                # Also consider reverse order of edge
+                edge = (clique[j], clique[i])
+                if edge in edge_strengths:
+                    edge_strength_sum += edge_strengths[edge]['EdgeStrength']
+    return node_strength_sum + edge_strength_sum
 
+# Node strength (previously calculated)
+node_strength = node_strength_results['USA'].set_index('Node')['NodeStrength'].to_dict()
 
+# Calculate strength for each clique
+clique_strengths = {tuple(clique): calculate_clique_strength(clique, node_strength, edge_strengths) for clique in cliques}
 
+[print(len(cliques[_])) for _ in range(5)]
+print("\n".join([f"{k}: {v}" for k, v in list(edge_strengths.items())[:10]]))
+```
+```
+30
+30
+29
+28
+27
 
+('g1', 'g2'): {'PCC': 0.7282491388045326, 'GO': 1.0, 'Pathway': 0.20689655172413793, 'PCC_Norm': 0.8681905318695081, 'GO_Norm': 1.0, 'Pathway_Norm': 0.5172413793103448, 'EdgeStrength': 0.7951439703932843}
+('g1', 'g3'): {'PCC': 0.7653527213164605, 'GO': 1.0, 'Pathway': 0.13333333333333333, 'PCC_Norm': 0.8873800558719053, 'GO_Norm': 1.0, 'Pathway_Norm': 0.3333333333333333, 'EdgeStrength': 0.7402377964017463}
+('g1', 'g4'): {'PCC': 0.8789570085087596, 'GO': 1.0, 'Pathway': 0.03125, 'PCC_Norm': 0.9461348188425974, 'GO_Norm': 1.0, 'Pathway_Norm': 0.078125, 'EdgeStrength': 0.6747532729475325}
+('g1', 'g5'): {'PCC': 0.7507769564392135, 'GO': 1.0, 'Pathway': 0.0625, 'PCC_Norm': 0.8798416466124945, 'GO_Norm': 1.0, 'Pathway_Norm': 0.15625, 'EdgeStrength': 0.6786972155374982}
+('g1', 'g7'): {'PCC': 0.89352960600505, 'GO': 0.7142857142857143, 'Pathway': 0.19230769230769232, 'PCC_Norm': 0.9536715899708958, 'GO_Norm': 0.4285714285714286, 'Pathway_Norm': 0.4807692307692308, 'EdgeStrength': 0.6210040831038518}
+('g1', 'g10'): {'PCC': 0.7938443708009103, 'GO': 0.7714285714285715, 'Pathway': 0.19230769230769232, 'PCC_Norm': 0.9021155922981782, 'GO_Norm': 0.5428571428571429, 'Pathway_Norm': 0.4807692307692308, 'EdgeStrength': 0.6419139886415173}
+('g1', 'g11'): {'PCC': 0.9128834471868577, 'GO': 0.9333333333333333, 'Pathway': 0.13636363636363635, 'PCC_Norm': 0.9636811624906784, 'GO_Norm': 0.8666666666666667, 'Pathway_Norm': 0.3409090909090909, 'EdgeStrength': 0.723752306688812}
+('g1', 'g12'): {'PCC': 0.8791171328799973, 'GO': 1.0, 'Pathway': 0.13636363636363635, 'PCC_Norm': 0.9462176332302443, 'GO_Norm': 1.0, 'Pathway_Norm': 0.3409090909090909, 'EdgeStrength': 0.7623755747131118}
+('g1', 'g13'): {'PCC': 0.8601812558178221, 'GO': 1.0, 'Pathway': 0.23809523809523808, 'PCC_Norm': 0.9364242266966776, 'GO_Norm': 1.0, 'Pathway_Norm': 0.5952380952380951, 'EdgeStrength': 0.8438874406449243}
+('g1', 'g18'): {'PCC': 0.9459181554886529, 'GO': 1.0, 'Pathway': 0.18181818181818182, 'PCC_Norm': 0.9807663139761367, 'GO_Norm': 1.0, 'Pathway_Norm': 0.45454545454545453, 'EdgeStrength': 0.811770589507197}
+```
 
+Using clique connectivity scores, CCPs are identified based on the maximum common nodes and the highest clique strength.
 
+```python
+# Clique Connectivity Profile Algorithm (CCP)
+def calculate_clique_connectivity(clique1, clique2, clique_strengths):
+    common_nodes = set(clique1).intersection(clique2)
+    if len(common_nodes) > 0:
+        return (clique_strengths[tuple(clique1)] + clique_strengths[tuple(clique2)]) / 2
+    return 0
 
+ccp = []
+for i, clique1 in enumerate(cliques):
+    for j, clique2 in enumerate(cliques):
+        if i != j:
+            connectivity_score = calculate_clique_connectivity(clique1, clique2, clique_strengths)
+            if connectivity_score > 0:
+                ccp.append((clique1, clique2, connectivity_score))
 
+ccp_df = pd.DataFrame(ccp, columns=['Clique1', 'Clique2', 'ConnectivityScore'])
 
+ccp_df
+print(len(ccp[0][0]),len(ccp[1][0])) # 0행의 클리크 크기
+```
+```
+	Clique1							Clique2						ConnectivityScore
+0	[g40, g90, g4, g94, g72, g32, g13, g69, g71, g...	[g40, g90, g4, g94, g72, g32, g13, g74, g18, g...	312.641903
+1	[g40, g90, g4, g94, g72, g32, g13, g69, g71, g...	[g40, g90, g47, g97, g56, g33, g88, g1, g35, g...	302.714158
+2	[g40, g90, g4, g94, g72, g32, g13, g69, g71, g...	[g40, g90, g4, g94, g72, g32, g13, g75, g88, g...	289.605115
+3	[g40, g90, g4, g94, g72, g32, g13, g69, g71, g...	[g40, g90, g47, g97, g56, g33, g88, g1, g35, g...	280.067959
+4	[g40, g90, g4, g94, g72, g32, g13, g74, g18, g...	[g40, g90, g4, g94, g72, g32, g13, g69, g71, g...	312.641903
+5	[g40, g90, g4, g94, g72, g32, g13, g74, g18, g...	[g40, g90, g47, g97, g56, g33, g88, g1, g35, g...	303.263337
+6	[g40, g90, g4, g94, g72, g32, g13, g74, g18, g...	[g40, g90, g4, g94, g72, g32, g13, g75, g88, g...	290.154293
+7	[g40, g90, g4, g94, g72, g32, g13, g74, g18, g...	[g40, g90, g47, g97, g56, g33, g88, g1, g35, g...	280.617137
+8	[g40, g90, g47, g97, g56, g33, g88, g1, g35, g...	[g40, g90, g4, g94, g72, g32, g13, g69, g71, g...	302.714158
+9	[g40, g90, g47, g97, g56, g33, g88, g1, g35, g...	[g40, g90, g4, g94, g72, g32, g13, g74, g18, g...	303.263337
+10	[g40, g90, g47, g97, g56, g33, g88, g1, g35, g...	[g40, g90, g4, g94, g72, g32, g13, g75, g88, g...	280.226548
+11	[g40, g90, g47, g97, g56, g33, g88, g1, g35, g...	[g40, g90, g47, g97, g56, g33, g88, g1, g35, g...	270.689393
+12	[g40, g90, g4, g94, g72, g32, g13, g75, g88, g...	[g40, g90, g4, g94, g72, g32, g13, g69, g71, g...	289.605115
+13	[g40, g90, g4, g94, g72, g32, g13, g75, g88, g...	[g40, g90, g4, g94, g72, g32, g13, g74, g18, g...	290.154293
+14	[g40, g90, g4, g94, g72, g32, g13, g75, g88, g...	[g40, g90, g47, g97, g56, g33, g88, g1, g35, g...	280.226548
+15	[g40, g90, g4, g94, g72, g32, g13, g75, g88, g...	[g40, g90, g47, g97, g56, g33, g88, g1, g35, g...	257.580349
+16	[g40, g90, g47, g97, g56, g33, g88, g1, g35, g...	[g40, g90, g4, g94, g72, g32, g13, g69, g71, g...	280.067959
+17	[g40, g90, g47, g97, g56, g33, g88, g1, g35, g...	[g40, g90, g4, g94, g72, g32, g13, g74, g18, g...	280.617137
+18	[g40, g90, g47, g97, g56, g33, g88, g1, g35, g...	[g40, g90, g47, g97, g56, g33, g88, g1, g35, g...	270.689393
+19	[g40, g90, g47, g97, g56, g33, g88, g1, g35, g...	[g40, g90, g4, g94, g72, g32, g13, g75, g88, g...	257.580349
 
+30 30
+```
 
+The results represent the maximum cliques identified with their connectivity scores using US data. By conducting this for each country and identifying the top common scoring cliques, comparing the connectivity profile for one of these top cliques across countries allows us to gain insights into the clique connectivity of the common maximum cliques by comparing the CCPs of each country starting from the same seed.
 
+Link: [Cliques for the identification of gene signatures for colorectal cancer across population][1]
 
 
 # Outline
@@ -527,7 +698,7 @@ print("\n".join([f"{k}: {v}" for k, v in list(edge_strengths.items())[:10]]))
 
 ## 최대 클리크 식별, 클리크 연결성 점수 계산, CCP(클리크 연결성 프로파일) 식별
 
-최대 크기의 클리크(5개)가 시드로 선택되고, 클리크 연결성 점수가 계산된다.
+최대 클리크 5개가 시드로 선택되고, 클리크 연결성 점수가 계산된다.
 
 ```python
 # Identify maximum cliques
@@ -639,3 +810,4 @@ print(len(ccp[0][0]),len(ccp[1][0])) # 0행의 클리크 크기
 원문: [Cliques for the identification of gene signatures for colorectal cancer across population][1]
 
 [1]: https://bmcsystbiol.biomedcentral.com/articles/10.1186/1752-0509-6-S3-S17
+[2]: https://github.com/yshghid/Paper-study/tree/main/%231-RWR-Clique-Connectivity#outline-1
