@@ -6,8 +6,7 @@ Korean version is provided [here][2].
 2) Data normalization, t-test
 3) Node strength calculation
 4) Edge strength calculation
-5) Calculation of Gene Ontology distance and pathway similarity scores
-6) Identification of maximum cliques, calculation of clique connectivity scores, identification of CCP (Clique Connectivity Profiles)
+5) Identification of maximum cliques and CCP
 
 # Pipeline
 
