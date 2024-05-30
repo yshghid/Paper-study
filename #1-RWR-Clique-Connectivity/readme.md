@@ -2,7 +2,7 @@ Korean version is provided [here][2].
 
 # Outline
 
-1) Dataset creation
+1) Load data
 2) Data normalization, t-test
 3) Node strength calculation
 4) Edge strength calculation
@@ -10,7 +10,7 @@ Korean version is provided [here][2].
 
 # Pipeline
 
-## Dataset creation
+## Load data
 
 Colorectal cancer (CRC) datasets are obtained from four countries (USA, GER, CHN, SA). The dataset is composed of rows representing 100 genes (g1-g100) and columns representing 10 samples, which are divided into CRC group (p1-p5) and a control group (c1-c5).
 
@@ -289,7 +289,7 @@ print("\n".join([f"{k}: {v}" for k, v in list(edge_strengths.items())[:10]]))
 ('g1', 'g18'): {'PCC': 0.9459181554886529, 'GO': 1.0, 'Pathway': 0.18181818181818182, 'PCC_Norm': 0.9807663139761367, 'GO_Norm': 1.0, 'Pathway_Norm': 0.45454545454545453, 'EdgeStrength': 0.811770589507197}
 ```
 
-## Identification of maximum cliques, calculation of clique connectivity scores, identification of CCP (Clique Connectivity Profiles)
+## Identification of maximum cliques and CCP (Clique Connectivity Profiles)
 
 Five maximum cliques are selected as seeds, and clique connectivity scores are calculated.
 
