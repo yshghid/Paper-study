@@ -63,7 +63,7 @@ nodes
 
 ppi 네트워크의 인접 행렬을 생성하고 ppi 네트워크를 정규화한다. 정규화 방식으로는 일반적인 차수를 사용한 방식과, 논문에서 제시하는 3가지의 코어성을 사용하는 방식이 있다.
 
-```
+```python
 adj_matrix = generate_adj_matrix(network)
 
 # Function to normalize based on degree
