@@ -13,4 +13,6 @@ I hope these codes help in understanding the changes in data, resulting from the
 
 2. Visonà, Giovanni, et al. "Network propagation for GWAS analysis: a practical guide to leveraging molecular networks for disease gene discovery." Briefings in bioinformatics 25.2 (2024): bbae014.
 
-3. Ahn, Hongryul, et al. "Propanet: Time-varying condition-specific transcriptional network construction by network propagation." Frontiers in plant science 10 (2019): 444086.
+4. Ahn, Hongryul, et al. "Propanet: Time-varying condition-specific transcriptional network construction by network propagation." Frontiers in plant science 10 (2019): 444086.
+
+5. Barel, Gal, and Ralf Herwig. "NetCore: a network propagation approach using node coreness." Nucleic acids research 48.17 (2020): e98-e98.
