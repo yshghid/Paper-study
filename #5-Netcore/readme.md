@@ -163,10 +163,321 @@ g19	0.000000	0.090909	0.000000	0.085714	0.096774	0.0	0.00	0.00	0.0	0.0	0.000000	
 g20	0.000000	0.060606	0.060606	0.000000	0.000000	0.0	0.00	0.00	0.0	0.0	0.000000	0.0	0.000000	0.0	0.000000	0.0	0.0	0.00	0.000000	0.0
 ```
 
-### RWR 알고리즘 수행, 유의미하게 재순위화된 노드 식별
+### RWR 실행, 유의미하게 재순위화된 노드 식별
 
-네트워크 전파 기법으로는 랜덤 워크 재시작 알고리즘이 사용되었다. 최종 전파 가중치와 네트워크 무작위화에서 유도된 P-값을 사용하여 유의미하게 재순위화된 노드를 식별한다. 
+정규화한 ppi 네트워크에서 RWR 알고리즘을 실행한다. 질병 연관 유전자를 시드 노드로 선택하고, 노드의 초기 가중치를 시드 노드는 1, 나머지 노드는 0으로 설정한다. 초기 가중치(p0)와 최종 전파 가중치(pk)를 비교하여 재순위화된 노드를 식별할 수 있다.
 
+재순위화 결과에 유의성 수준을 할당하기 위해 무작위화된 네트워크를 사용하여 얻은 전파 가중치와 비교한다. 네트워크 무작위화에는 double-edge swap 알고리즘을 사용하여 n=100개의 무작위 네트워크를 생성하고 이를 pk와 비교하여 각 노드에 유의성 수준을 할당하였다. 
 
-NetCore의 재순위화 결과에 유의성 수준을 할당하기 위해 우리는 무작위 차수-보존 네트워크(RDPN)을 사용하여 정규화를 적용했습니다. 이 방법은 입력 네트워크의 무작위화를 기반으로 하여 각 노드의 전파 가중치가 무작위 차수-보존 네트워크를 사용하여 얻은 전파 가중치와 비교되도록 합니다. 이러한 네트워크를 생성하기 위해 우리는 Networkx의 double-edge swap 알고리즘을 사용했습니다. 알고리즘은 각 단계에서 무작위로 두 개의 엣지 (u, v)와 (x, y)를 선택하여 제거한 다음, 새로운 엣지 (u, y)와 (x, v)를 생성하며 최대 n개의 무작위 교환을 실행할 수 있도록 합니다. 스왑은 네트워크가 연결된 상태를 유지할 때만 유지됩니다. 이렇게 n개의 무작위 네트워크가 생성된 후, 이러한 무작위 네트워크로 얻어진 전파 가중치를 사용하여 유의성 수준을 계산합니다. 따라서, 노드 v의 전파 가중치 w(v)에 대한 P-값 pv는 n개의 무작위 네트워크와 해당 전파 가중치 w1(v), ..., wn(v)로 정의됩니다. 분석에서 우리는 n = 100개의 무작위 네트워크를 생성하여 달성할 수 있는 최소 P-값이 P = 0.0099가 되도록 했습니다. 이 임계값은 기본값으로 선택되지만 다른 설정에서는 사용자가 변경할 수 있습니다.
+```python
+# Disease related genes (seed genes)
+seeds = ['g2', 'g4','g6','g8','g10']
+
+# Function to run RWR
+def rwr(norm_adj_matrix, seeds, alpha, max_iter=100, tol=1e-6):
+    p0 = np.zeros(norm_adj_matrix.shape[0])
+    seed_indices = [norm_adj_matrix.index.get_loc(seed) for seed in seeds]
+    p0[seed_indices] = 1
+    W = norm_adj_matrix.values
+    n = W.shape[0]
+    pk = p0.copy()
+    for _ in range(max_iter):
+        pk_new = alpha * p0 + (1 - alpha) * W @ pk
+        if np.linalg.norm(pk_new - pk, 1) < tol:
+            break
+        pk = pk_new
+    return pk
+
+# Function to run random RWR
+def random_rwr(network, seeds, alpha, n_random_networks=100):
+    pks_random = []
+    for _ in range(n_random_networks):
+        G_random = network.copy()
+        nx.double_edge_swap(G_random, nswap=len(G_random.edges()), max_tries=len(G_random.edges()) * 10)
+
+        core_random = generate_nodes(G_random)
+        adj_matrix_random = generate_adj_matrix(G_random)
+        norm_adj_random = normalize_adj_matrix(adj_matrix_random, core_random, norm_method)
+        
+        pk_random = rwr(norm_adj_random, seeds, alpha, max_iter=100, tol=1e-6)
+        pks_random.append(pk_random)
+
+    pks_random = np.array(pks_random)
+    return pks_random
+
+# Function to calculate P-values for each node
+def calculate_p_values(network, pk_original, pks_random):
+    nodes = generate_nodes(network)
+    p_values = []
+    for i, node in enumerate(nodes):
+        original_weight = pk_original[i]
+        random_weights = pks_random[:, i]
+        p_value = np.sum(random_weights >= original_weight) / pks_random.shape[0]
+        p_values.append(p_value)
+    return p_values
+```
+
+예시로, α = 0.1 에 대해 RWR를 수행하고 유의미하게 재순위화된 노드를 식별하면 다음과 같다. 논문에서는 p-value<0.0099 를 적용하였으나, 코드에서는 <0.3을 적용하였다.
+
+```python
+# Run RWR algorithm for α = 0.1
+alpha = 0.1
+
+pk = rwr(norm_adj_matrix, seeds, alpha=alpha)
+pks_random = random_rwr(network, seeds, alpha=alpha)
+p_values = calculate_p_values(network, pk, pks_random)
+    
+print(f"\nRWR Result (α = {alpha}):")
+for node, score in zip(norm_adj_matrix.index, pk):
+        print(f"{node}: {score:.4f}")
+    
+# Identify significantly re-ranked nodes
+significance_level = 0.3
+significant_nodes = [node for node, p_value in zip(norm_adj_matrix.index, p_values) if p_value < significance_level]
+        
+print(f"\nSignificantly re-ranked nodes (α = {alpha}):")
+for node in significant_nodes:
+    print(node)
+```
+```
+RWR Result (α = 0.1):
+g1: 0.5260
+g2: 0.6989
+g3: 0.5806
+g4: 0.6608
+g5: 0.4917
+g6: 0.1622
+g7: 0.2686
+g8: 0.3495
+g9: 0.0645
+g10: 0.1191
+g11: 0.1510
+g12: 0.0698
+g13: 0.1510
+g14: 0.0153
+g15: 0.1475
+g16: 0.0143
+g17: 0.0591
+g18: 0.2495
+g19: 0.1510
+g20: 0.0698
+
+Significantly re-ranked nodes (α = 0.1):
+g7
+```
+
+### 파라미터 α 선택
+
+α = 0.3, 0.5, 0.8 에 대해 해당 알고리즘을 수행하였다. RWR 에서 α는 재시작 파라미터로, 값이 1에 가까울수록 해당 워크가 시드 노드로 돌아갈 확률이 높다. 즉, 시드 노드의 가중치는 1에 가깝게 유지되며, 시드 노드의 영향력이 시드에 가까운 노드에만 전파되게 된다. 
+
+```python
+# Run RWR algorithm for α = 0.3, 0.5, 0.8
+alphas = [0.3, 0.5, 0.8]
+for alpha in alphas:
+    pk = rwr(norm_adj_matrix, seeds, alpha=alpha)
+    pks_random = random_rwr(network, seeds, alpha=alpha)
+    p_values = calculate_p_values(network, pk, pks_random)
+    
+    print(f"\nRWR Result (α = {alpha}):")
+    #for node, score in zip(norm_adj_matrix.index, pk):
+    #    print(f"{node}: {score:.4f}")
+    
+    # Identify significantly re-ranked nodes
+    significance_level = 0.3
+    significant_nodes = [node for node, p_value in zip(norm_adj_matrix.index, p_values) if p_value < significance_level]
+        
+    print(f"\nSignificantly re-ranked nodes (α = {alpha}):")
+    for node in significant_nodes:
+        print(node)
+```
+```
+RWR Result (α = 0.3):
+
+Significantly re-ranked nodes (α = 0.3):
+g7
+g11
+g12
+g13
+g19
+g20
+
+RWR Result (α = 0.5):
+
+Significantly re-ranked nodes (α = 0.5):
+g2
+g3
+g7
+g11
+g12
+g13
+g19
+g20
+
+RWR Result (α = 0.8):
+
+Significantly re-ranked nodes (α = 0.8):
+g2
+g7
+g11
+g12
+g19
+g20
+```
+
+α를 조절해서 새로운 질병 관련 유전자를 찾는 것(finding novel disease-associated genes)과 잠재적인 거짓 예측을 포함시키는 것(including potential false predictions) 사이의 균형을 조절할 수 있다. 본 논문에서는 α = 0.8을 적용하여 false positive 를 줄이는 것을 선택하였다.
+
+### 5-fold 교차 검증을 통한 4가지 정규화 방법 비교
+
+4가지 정규화 방법의 질병 연관 유전자를 식별하는 성능을 비교하기 위해, 질병 유전자를 1:4 로 나누어 훈련 세트를 생성하고, 훈련 세트가 시드 유전자로 설정된 네 번의 네트워크 전파를 실행하였다. 질병 유전자를 5개로 정했기 때문에 4개 유전자가 훈련 세트가 되었다. α는 0.8 로 설정되었다. 
+
+```python
+# Function to perform 5-fold cross-validation and calculate ROC curves for 4 normalization methods
+def cross_validation_and_roc(network, disease_genes, alpha, n_splits=5):
+    
+    edges = generate_edges(network)
+    nodes = generate_nodes(network)
+    adj_matrix = generate_adj_matrix(network)
+
+    norm_methods = ['degree', 'core', 'diff', 'ratio']
+    kf = KFold(n_splits=n_splits, shuffle=True, random_state=42)
+    
+    all_fpr = []
+    all_tpr = []
+    all_auroc = []
+
+    for norm_method in norm_methods:
+        norm_adj_matrix = normalize_adj_matrix(adj_matrix, nodes, norm_method=norm_method)
+        
+        tprs = []
+        fprs = []
+        aurocs = []
+        
+        for train_index, test_index in kf.split(disease_genes):
+            train_genes = [disease_genes[i] for i in train_index]
+            test_genes = [disease_genes[i] for i in test_index]
+            
+            p0 = np.zeros(len(norm_adj_matrix))
+            p0[[norm_adj_matrix.index.get_loc(gene) for gene in train_genes]] = 1.0 / len(train_genes)
+            
+            pk = rwr(norm_adj_matrix, seeds, alpha=alpha, max_iter=100, tol=1e-6)
+            
+            pks_random = random_rwr(network, seeds, alpha=alpha, n_random_networks=100)
+            
+            p_values = calculate_p_values(network, pk, pks_random)
+            
+            y_true = np.isin(norm_adj_matrix.index, test_genes).astype(int)
+            y_scores = -np.array(p_values)
+            
+            fpr, tpr, _ = roc_curve(y_true, y_scores)
+            interp_fpr = np.linspace(0, 1, 100)
+            interp_tpr = interp1d(fpr, tpr, kind='linear')(interp_fpr)
+            
+            tprs.append(interp_tpr)
+            fprs.append(interp_fpr)
+            aurocs.append(auc(fpr, tpr))
+
+        mean_tpr = np.mean(tprs, axis=0)
+        mean_fpr = np.mean(fprs, axis=0)
+        mean_auc = np.mean(aurocs)
+        
+        all_tpr.append(mean_tpr)
+        all_fpr.append(mean_fpr)
+        all_auroc.append(mean_auc)
+
+        plt.plot(mean_fpr, mean_tpr, label=f'{norm_method} (AUC = {mean_auc:.2f})')
+
+    plt.plot([0, 1], [0, 1], 'k--')
+    plt.xlabel('False Positive Rate')
+    plt.ylabel('True Positive Rate')
+    plt.title('ROC Curve for Different Normalization Methods')
+    plt.legend()
+    plt.show()
+    
+    return all_fpr, all_tpr, all_auroc
+
+# Disease-related genes (seed genes)
+seeds = ['g2', 'g4','g6','g8','g10']
+
+# Perform cross-validation and plot ROC curves
+all_fpr, all_tpr, all_auroc = cross_validation_and_roc(network, seeds, alpha=0.8)
+```
+![image](https://github.com/yshghid/Paper-study/assets/153489198/12e7ea13-8aea-4a3f-842c-a43cd9a81c55)
+
+```python
+# Display results
+for norm_method, auroc in zip(['degree', 'core', 'diff', 'ratio'], all_auroc):
+    print(f"{norm_method} normalization AUROC: {auroc:.4f}")
+```
+```
+degree normalization AUROC: 0.3632
+core normalization AUROC: 0.4000
+diff normalization AUROC: 0.4105
+ratio normalization AUROC: 0.3684
+```
+
+분석 결과 노드의 차수와 코어 숫자 간의 차이를 적용한 'diff' 정규화가 가장 높은 AUROC를 보인다. 본 논문에서는 'core' 정규화가 가장 높은 AUROC를 보였다.
+
+### 유전자 모듈 식별
+
+먼저 시드와 에지를 갖는 노드들로 구성된 초기 시드 서브 네트워크를 생성한다. 네트워크 전파 수행 후 특정 조건(pvalue<0.01, w>wmin)을 만족하는 노드 중 시드 서브 네트워크와 에지를 갖는 노드가 있다면 추가하여, 최종 시드 서브 네트워크 내에 각 모듈이 생성된다.
+
+```python
+# Extension of seed modules using P-values and propagation weights
+def identify_modules(network, seeds, norm_method, alpha, p_threshold=0.01, wmin_percentile=75):
+
+    edges = generate_edges(network)
+    nodes = generate_nodes(network)
+    adj_matrix = generate_adj_matrix(network)
+    norm_adj_matrix = normalize_adj_matrix(adj_matrix, nodes, norm_method)
+
+    pk = rwr(norm_adj_matrix, seeds, alpha=alpha)
+    pks_random = random_rwr(network, seeds, alpha=alpha, n_random_networks=100)
+    p_values = calculate_p_values(network, pk, pks_random)
+    
+    # Step i: Extract seed-induced sub-network
+    seed_subnetwork = network.subgraph(seeds).copy()
+    
+    # Step ii: Extend seed-induced sub-network
+    extended_subnetwork = seed_subnetwork.copy()
+    
+    # Get propagation weights and significant nodes
+    significant_nodes = [node for node, p_val in zip(network.nodes, p_values) if p_val < p_threshold]
+    
+    # Calculate wmin based on the 75th percentile of propagation weights of significant nodes
+    if significant_nodes:
+        propagation_weights = np.array([pk[list(network.nodes).index(node)] for node in significant_nodes])
+        wmin = np.percentile(propagation_weights, wmin_percentile)
+    else:
+        wmin = 0
+    
+    # Add nodes to the extended sub-network
+    for node in significant_nodes:
+        if node not in seeds and pk[list(network.nodes).index(node)] > wmin:
+            neighbors = set(network.neighbors(node))
+            if neighbors & set(seeds):
+                extended_subnetwork.add_node(node)
+                for neighbor in neighbors:
+                    if neighbor in seeds or neighbor in extended_subnetwork.nodes:
+                        extended_subnetwork.add_edge(node, neighbor, weight=network.edges[node, neighbor]['weight'])
+    
+    # Step iii: Identify modules as connected components
+    modules = [component for component in nx.connected_components(extended_subnetwork)]
+    
+    return modules
+
+# Set disease genes as seed genes
+seeds = ['g2', 'g4','g6','g8','g10']
+
+# Set normalization method
+norm_method = 'core'
+
+# Identify modules
+modules = identify_modules(network, seeds, norm_method, alpha = 0.8)
+
+for i, module in enumerate(modules):
+    print(f"Module {i+1}: {module}")
+```
+```
+```
+
 
