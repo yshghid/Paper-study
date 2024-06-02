@@ -7,7 +7,7 @@ The code is designed to provide an intuitive understanding of the pipeline outli
 I hope these codes help in understanding the changes in data, resulting from the application of the algorithm!
 
 
-### References
+### Reference
 
 1. Pradhan, Meeta P., Kshithija Nagulapalli, and Mathew J. Palakal. "Cliques for the identification of gene signatures for colorectal cancer across population." BMC systems biology 6 (2012): 1-17.
 
