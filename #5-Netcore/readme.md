@@ -328,7 +328,7 @@ g20
 
 ### 5-fold 교차 검증을 통한 4가지 정규화 방법 비교
 
-4가지 정규화 방법의 질병 연관 유전자를 식별하는 성능을 비교하기 위해, 질병 유전자를 1:4 로 나누어 훈련 세트를 생성하고, 훈련 세트가 시드 유전자로 설정된 네 번의 네트워크 전파를 실행하였다. 질병 유전자를 5개로 정했기 때문에 4개 유전자가 훈련 세트가 되었다. α는 0.8 로 설정되었다. 
+4가지 정규화 방법의 질병 연관 유전자를 식별하는 성능을 비교하기 위해, 질병 유전자를 1:4 로 나누어 훈련 세트를 생성하고, 훈련 세트가 시드 유전자로 설정된 네 번의 네트워크 전파를 실행하였다. 질병 유전자를 5개로 정했기 때문에 4번의 네트워크 전파 각각에서 4개 유전자가 훈련 세트가 되었다. α는 0.8 로 설정되었다. 
 
 ```python
 # Function to perform 5-fold cross-validation and calculate ROC curves for 4 normalization methods
@@ -423,7 +423,7 @@ ratio normalization AUROC: 0.3684
 
 ```python
 # Extension of seed modules using P-values and propagation weights
-def identify_modules(network, seeds, norm_method, alpha, p_threshold=0.01, wmin_percentile=75):
+def identify_modules(network, seeds, norm_method, alpha, p_threshold, wmin_percentile):
 
     edges = generate_edges(network)
     nodes = generate_nodes(network)
@@ -472,12 +472,25 @@ seeds = ['g2', 'g4','g6','g8','g10']
 norm_method = 'core'
 
 # Identify modules
-modules = identify_modules(network, seeds, norm_method, alpha = 0.8)
+modules = identify_modules(network, seeds, norm_method, alpha = 0.8, p_threshold=0.3, wmin_percentile=75)
 
 for i, module in enumerate(modules):
     print(f"Module {i+1}: {module}")
 ```
 ```
+Module 1: {'g8', 'g10', 'g3', 'g6', 'g4', 'g2'}
+```
+
+코드에서는 p-value<0.3, wmin=0.75로 설정하여 6개의 유전자가 포함된 모듈이 생성되었다. 모듈에는 질병 유전자 g2, g4, g6, g8, g10이 포함되어 있으며, g3이 추가되었다. 
+
+참고로, 초기 시드 서브 네트워크는 아래와 같았다. g6은 다른 질병 유전자와 노드를 갖지 않았으나, 네트워크 전파 후 유의미하게 가중치가 변화한 것으로 식별된 g3이 추가됨으로써 나머지 질병 유전자와 하나의 모듈을 형성하게 되었다.
+
+```
+Module 1: {'g4', 'g10', 'g8', 'g2'}
+Module 2: {'g6'}
 ```
 
 
+원문: [NetCore: a network propagation approach using node coreness][1]
+
+[1]: https://academic.oup.com/nar/article/48/17/e98/5879427?login=false
