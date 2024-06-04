@@ -33,7 +33,7 @@ gwas_catalog
 1283 rows × 3 columns
 ```
 
-질병 연관 SNP 정보를 유전자 점수로 변환하는 여러 툴이 있다. 툴들은 통계 테스트 방법이 조금씩 다르며, 해당 논문에선느 PEGASUS를 사용하였다. PEGASUS는 위의 GWAS 카탈로그를 입력으로 해서, 질병 연관 SNP의 p-value를 사용해서 유전자마다 통계적 유의성(Pvalue)과 점수(Score)를 생성해준다.
+질병 연관 SNP 정보를 유전자 단위 점수로 변환하는 여러 툴이 있다. 툴들은 통계 테스트 방법이 조금씩 다르며, 해당 논문에선느 PEGASUS를 사용하였다. PEGASUS는 위의 GWAS 카탈로그를 입력으로 해서, 질병 연관 SNP의 p-value를 사용해서 유전자마다 통계적 유의성(Pvalue)과 점수(Score)를 생성해준다.
 
 ```
 # Load pegasus output
