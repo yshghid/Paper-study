@@ -10,7 +10,7 @@
 
 ## GWAS 카탈로그 로드, SNP 통계 테스트
 
-질병 연관 SNP에 대한 정보는 GWAS 카탈로그 형식으로 다운로드할 수 있다. 카탈로그에는 각 SNP의 염색체 위치, 연관된 유전자, 통계적 유의성 (p-value), accession id 등이 제공된다. 해당 데이터에서 SNP는 1283개이고 유전자는 20개(g1-g20)이다.
+질병 연관 SNP에 대한 정보는 GWAS 카탈로그로 다운로드할 수 있다. 카탈로그에는 각 SNP의 염색체 위치, 연관된 유전자, 통계적 유의성 (p-value), accession id 등이 제공된다. 해당 데이터에서 SNP는 1283개이고 유전자는 20개(g1-g20)이다.
 
 ```python
 # Load gwas catalog
@@ -33,7 +33,7 @@ gwas_catalog
 1283 rows × 3 columns
 ```
 
-질병 연관 SNP 정보를 유전자 단위 점수로 변환하는 여러 툴이 있다. 툴들은 통계 테스트 방법이 조금씩 다르며, 해당 논문에서는 PEGASUS를 사용하였다. PEGASUS는 위의 GWAS 카탈로그를 입력으로 해서, 질병 연관 SNP의 p-value를 사용해서 유전자마다 통계적 유의성(Pvalue)과 점수(Score)를 생성해준다.
+질병 연관 SNP 정보를 유전자 단위 점수로 변환하는 여러 툴이 있다. 툴들은 통계 테스트 방법이 조금씩 다르며, 해당 논문에서는 PEGASUS를 사용하였다. PEGASUS는 GWAS 카탈로그를 입력으로 받아, 질병 연관 SNP 정보를 활용하여 유전자마다 질병과의 연관성에 대한 통계적 유의성(Pvalue)과 점수(Score)를 생성해준다. 아래 PEGASUS 데이터는 g1-g20에 대한 질병 연관성 분석 결과이다.
 
 ```
 # Load pegasus output
@@ -132,10 +132,11 @@ targets
  '19',
  '20']
 ```
+시드와 타겟 유전자 이름이 정수인 이유는, 네트워크 전파에는 노드에 대한 명명법으로 gene symbol이 아닌 integer 형태인 ncbi id를 주로 사용하기 때문이다. gene symbol id g1-g20 각각에 대한 ncbi id는 g를 뺀 뒤의 숫자로 할당되었다. 
 
 ## 그래프 로드
 
-ppi 네트워크는 소스 노드와 타겟 노드 정보로 구성돼있다. 노드는 유전자이며 보통 ncbi id로 나타낸다. 이 네트워크는 20개의 노드에 대해 약 100개의 에지를 갖는다.
+ppi 네트워크는 소스 노드와 타겟 노드 정보로 구성돼있다. 아래 네트워크는 20개의 노드에 대해 80개의 에지를 갖는다. 본 논문에서 에지의 가중치는 고려되지 않았다.
 
 ```
 # Generate graph
@@ -285,6 +286,8 @@ Gene NCBI ID	Gene	Initial Score	Final Score
 13	7	g7	0.039795	0.011679
 14	10	g10	0.000000	0.006413
 ```
+
+초기 가중치가 0으로 할당되어 순위가 20위였던 유전자 g1, g18의 순위가 네트워크 전파 후 각각 14위, 15위로 재랭크된 것을 확인할 수 있다. 
 
 원문: [Network propagation for GWAS analysis: a practical guide to leveraging molecular networks for disease gene discovery][1]
 
